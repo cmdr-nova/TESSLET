@@ -17,7 +17,7 @@ export const config = {
 	/** DEV/TEST ONLY: lets fediverse login talk to http://localhost instances. Never set in production. */
 	fediDevAllowLocal: process.env.FEDI_DEV_ALLOW_LOCAL === '1',
 	appName: process.env.APP_NAME ?? 'Tesslet',
-	supportUrl: process.env.SUPPORT_URL ?? 'https://mkultra.monster/clearance/',
+	supportUrl: process.env.SUPPORT_URL ?? 'https://mkultra.monster/support/',
 	adminEmails: (process.env.ADMIN_EMAILS ?? '')
 		.split(',')
 		.map((e) => e.trim().toLowerCase())

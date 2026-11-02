@@ -55,7 +55,7 @@ npm run dev                      # http://localhost:5173
 | `APP_NAME` | `Tesslet` | Shown in the header and About page |
 | `ADMIN_EMAILS` | empty | Comma-separated; these accounts get `/admin` when they sign up (fediverse/Bluesky users can add an email at the welcome step) |
 | `PUBLIC_URL` | empty | Your public `https://` URL. Required for Bluesky/ATProto login in production |
-| `SUPPORT_URL` | `https://mkultra.monster/clearance/` | The support link on the About page |
+| `SUPPORT_URL` | `https://mkultra.monster/support/` | The support link on the About page |
 | `POSTGRES_PASSWORD` | `tesslet` | Compose only. Change it for anything public |
 | `PORT` | `3000` | HTTP port |
 
@@ -98,12 +98,11 @@ Set a real `POSTGRES_PASSWORD`, and back up the `db` and `uploads` volumes.
 
 Tesslet uses [Semantic Versioning](https://semver.org/) and keeps a [CHANGELOG](CHANGELOG.md).
 
-To cut a release:
+Releases are automatic. To cut one, in a PR:
 
-1. Move the `Unreleased` notes in `CHANGELOG.md` under a new version heading.
-2. `npm version <patch|minor|major> --no-git-tag-version` and commit both files.
-3. `git tag vX.Y.Z && git push origin main --tags`
+1. Move the `Unreleased` notes in `CHANGELOG.md` under a new `## [X.Y.Z] - date` heading.
+2. Bump `"version"` in `package.json` to match (`npm version <patch|minor|major> --no-git-tag-version`).
 
-The Release workflow checks the tag matches `package.json`, publishes `ghcr.io/cmdr-nova/tesslet:X.Y.Z` (plus `X.Y` and `latest`), and creates a GitHub release from the changelog entry.
+When that merges to `main`, the Release workflow sees a version with no tag yet, tags it `vX.Y.Z`, publishes `ghcr.io/cmdr-nova/tesslet:X.Y.Z` and `:latest`, and creates the GitHub release from the changelog entry. Pushes that don't change the version do nothing. You can also run it by hand from the Actions tab.
 
 CI runs on every push to `main` and every pull request: typecheck, unit tests, build, migrations, seed, the full end-to-end test, and a Docker build.
