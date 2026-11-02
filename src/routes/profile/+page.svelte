@@ -1,9 +1,35 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
+	import PhotoCropper from '#lib/PhotoCropper.svelte';
 
 	let { data, form } = $props();
 	const p = $derived(data.profile);
+
+	// With JavaScript, picking a file opens the cropper and "Use photo" uploads it.
+	// Without it, the plain file input + Upload button still works.
+	let js = $state(false);
+	onMount(() => (js = true));
+	let uploadForm: HTMLFormElement | undefined = $state();
+	let fileInput: HTMLInputElement | undefined = $state();
+	let pending = $state<File | null>(null);
+
+	function picked() {
+		const f = fileInput?.files?.[0];
+		if (f) pending = f;
+	}
+	function cropped(f: File) {
+		const dt = new DataTransfer();
+		dt.items.add(f);
+		fileInput!.files = dt.files;
+		pending = null;
+		uploadForm?.requestSubmit();
+	}
+	function cancelCrop() {
+		pending = null;
+		if (fileInput) fileInput.value = '';
+	}
 
 	let lat = $state('');
 	let lng = $state('');
@@ -51,12 +77,16 @@
 			{/each}
 		</div>
 		{#if data.photos.length < data.maxPhotos}
-			<form method="post" action="?/addPhoto" enctype="multipart/form-data" use:enhance class="row">
-				<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required />
-				<button>Upload</button>
+			<form method="post" action="?/addPhoto" enctype="multipart/form-data" use:enhance class="row" bind:this={uploadForm}>
+				<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required bind:this={fileInput} onchange={picked} />
+				{#if !js}<button>Upload</button>{/if}
 			</form>
 		{/if}
 	</section>
+{/if}
+
+{#if pending}
+	<PhotoCropper file={pending} onCropped={cropped} onCancel={cancelCrop} />
 {/if}
 
 <form method="post" action="?/save" class="card stack" style="margin-top:1rem">

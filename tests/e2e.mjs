@@ -13,10 +13,10 @@ const step = (name) => console.log(`✓ ${name}`);
 
 const dir = await mkdtemp(path.join(tmpdir(), 'tesslet-e2e-'));
 const jpgPath = path.join(dir, 'me.jpg');
-// A JPEG carrying GPS EXIF, to prove uploads get scrubbed.
+// A landscape JPEG carrying GPS EXIF, to prove uploads get cropped to 4:5 and scrubbed.
 await writeFile(
 	jpgPath,
-	await sharp({ create: { width: 800, height: 1000, channels: 3, background: '#33aa77' } })
+	await sharp({ create: { width: 1600, height: 900, channels: 3, background: '#33aa77' } })
 		.jpeg()
 		.withExif({ IFD3: { GPSLatitudeRef: 'N', GPSLatitude: '51/1 30/1 0/1' } })
 		.toBuffer()
@@ -55,13 +55,22 @@ try {
 	await a.click('button:has-text("Save profile")');
 	await a.waitForURL('**/profile?welcome=1');
 	await a.setInputFiles('input[name=photo]', jpgPath);
-	await a.click('button:has-text("Upload")');
+	await a.waitForSelector('[role=dialog] .frame img');
+	const frame = await (await a.$('[role=dialog] .frame'))?.boundingBox();
+	assert.ok(frame, 'cropper opens after picking a photo');
+	await a.mouse.move(frame.x + frame.width / 2, frame.y + frame.height / 2);
+	await a.mouse.down();
+	await a.mouse.move(frame.x + frame.width / 2 + 60, frame.y + frame.height / 2, { steps: 5 });
+	await a.mouse.up();
+	await a.click('button:has-text("Use photo")');
 	await a.waitForSelector('img.photo');
-	step('profile + photo upload');
+	assert.equal(await a.$('[role=dialog]'), null, 'cropper closes after upload');
+	step('profile + photo upload through the cropper');
 
 	const ownPhoto = await a.getAttribute('img.photo', 'src');
 	const meta = await sharp(await (await ctxA.request.get(BASE + ownPhoto)).body()).metadata();
 	assert.equal(meta.format, 'webp');
+	assert.deepEqual([meta.width, meta.height], [1080, 1350], 'cropped to the 4:5 profile frame');
 	assert.equal(meta.exif, undefined, 'EXIF must be stripped');
 	const anon = await browser.newContext();
 	assert.equal((await anon.request.get(BASE + ownPhoto, { maxRedirects: 0 })).status(), 303, 'photos need login');

@@ -24,6 +24,7 @@
 	}
 }
 * { box-sizing: border-box; }
+input[type="range"], input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
 a { color: var(--accent); }
 header { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; z-index: 10; }
@@ -48,10 +49,17 @@ fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem;
 .checks input { width: auto; }
 .row { display: flex; gap: 0.75rem; }
 .row > * { flex: 1; }
-button, .button { font: inherit; font-weight: 700; border: 0; border-radius: 999px; padding: 0.65rem 1.2rem; background: var(--accent); color: var(--accent-text); cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
-button.secondary, .button.secondary { background: transparent; color: var(--text); border: 1px solid var(--line); }
+.row > button, .row > .button { min-width: 0; white-space: normal; }
+.cta { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+.cta .button { flex: 1 1 11rem; max-width: 16rem; padding: 0.85rem 1.6rem; font-size: 1.05rem; }
+button, .button { font: inherit; font-weight: 700; line-height: 1.2; border: 1px solid transparent; border-radius: 999px; padding: 0.7rem 1.4rem; min-height: 2.75rem; background: var(--accent); color: var(--accent-text); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; text-align: center; white-space: nowrap; transition: transform 0.1s ease, filter 0.15s ease, background-color 0.15s ease; }
+button:hover, .button:hover { filter: brightness(1.08); }
+button:active, .button:active { transform: scale(0.97); }
+button:focus-visible, .button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 2px; }
+button.secondary, .button.secondary { background: transparent; color: var(--text); border-color: color-mix(in srgb, var(--text) 35%, transparent); }
+button.secondary:hover, .button.secondary:hover { filter: none; background: color-mix(in srgb, var(--text) 8%, transparent); }
 button.danger { background: var(--bad); color: #fff; }
-button.link { background: none; color: var(--muted); padding: 0; font-weight: 400; text-decoration: underline; }
+button.link { background: none; color: var(--muted); padding: 0; min-height: 0; font-weight: 400; text-decoration: underline; border: 0; }
 button:disabled { opacity: 0.5; cursor: default; }
 .error { color: var(--bad); font-weight: 600; }
 .ok { color: var(--good); font-weight: 600; }
