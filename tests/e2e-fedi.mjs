@@ -3,9 +3,12 @@
 // Run: MOCK_URL=localhost:4010 BASE_URL=http://localhost:3000 npm run test:e2e:fedi
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3000';
 const MOCK = process.env.MOCK_URL ?? 'localhost:4010';
+// Throwaway password for a throwaway test account, generated so no credential-looking literal lives in the repo.
+const TEST_PASSWORD = randomBytes(12).toString('base64url');
 const step = (name) => console.log(`✓ ${name}`);
 const mockUser = (username) =>
 	fetch(`http://${MOCK}/__mock/user`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username }) });
@@ -64,7 +67,7 @@ try {
 	const b = await newPage();
 	await b.goto(`${BASE}/signup`);
 	await b.fill('input[name=email]', 'linker@test.local');
-	await b.fill('input[name=password]', 'supersecret123');
+	await b.fill('input[name=password]', TEST_PASSWORD);
 	await b.fill('input[name=birthdate]', '1990-02-02');
 	await b.check('input[name=agree]');
 	await b.click('button:has-text("Sign up")');
