@@ -8,11 +8,11 @@
 		See everyone who likes you. Match. Talk. No subscriptions, no blurred photos, no "boosts".
 	</p>
 	{#if data.user}
-		<p><a class="button" href="/discover">Start discovering</a></p>
+		<div class="cta"><a class="button" href="/discover">Start discovering</a></div>
 	{:else}
-		<p class="row" style="max-width: 360px; margin: 0 auto">
+		<div class="cta">
 			<a class="button" href="/signup">Create an account</a>
 			<a class="button secondary" href="/login">Log in</a>
-		</p>
+		</div>
 	{/if}
 </section>

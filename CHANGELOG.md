@@ -5,6 +5,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-02
+
+### Added
+- Photo cropper: picking a photo opens a 4:5 crop frame with drag to move, scroll/pinch/slider to zoom, and keyboard controls. Uploads still work without JavaScript.
+
+### Changed
+- Buttons redesigned: no more text wrapping, consistent heights, clearer outlined secondary style, hover/press/focus states.
+- Landing page call-to-action buttons sit side by side on wide screens and stack at equal widths on phones.
+
 ## [0.2.0] - 2026-11-02
 
 ### Added
@@ -36,6 +45,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Installable PWA manifest, light and dark themes.
 - Docker Compose setup (app + PostGIS), demo seed script, unit tests, Playwright end-to-end test, CI and release workflows.
 
-[Unreleased]: https://github.com/cmdr-nova/tesslet/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/cmdr-nova/tesslet/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/cmdr-nova/tesslet/releases/tag/v0.3.0
 [0.2.0]: https://github.com/cmdr-nova/tesslet/releases/tag/v0.2.0
 [0.1.0]: https://github.com/cmdr-nova/tesslet/commit/6a650ee
