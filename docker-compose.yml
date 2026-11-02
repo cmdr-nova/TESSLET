@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: tesslet
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tesslet}
+      POSTGRES_DB: tesslet
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tesslet -h localhost"]
+      interval: 3s
+      retries: 20
+    # Uncomment to reach the database from your machine (e.g. for `npm run dev`)
+    # ports: ["5432:5432"]
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://tesslet:${POSTGRES_PASSWORD:-tesslet}@db:5432/tesslet
+      APP_NAME: ${APP_NAME:-Tesslet}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      SUPPORT_URL: ${SUPPORT_URL:-https://mkultra.monster/clearance/}
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads:/data/uploads
+
+volumes:
+  db:
+  uploads:
