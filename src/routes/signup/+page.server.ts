@@ -2,18 +2,12 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { sql } from '#lib/server/db.ts';
 import { config } from '#lib/server/config.ts';
-import { createSession, hashPassword, setSessionCookie } from '#lib/server/auth.ts';
+import { createSession, hashPassword, isAdult, setSessionCookie } from '#lib/server/auth.ts';
 import { allow } from '#lib/server/ratelimit.ts';
 
 export const load: PageServerLoad = ({ locals }) => {
 	if (locals.user) redirect(303, '/discover');
 };
-
-function isAdult(birthdate: Date) {
-	const cutoff = new Date();
-	cutoff.setFullYear(cutoff.getFullYear() - 18);
-	return birthdate <= cutoff;
-}
 
 export const actions: Actions = {
 	default: async ({ request, cookies, getClientAddress, url }) => {

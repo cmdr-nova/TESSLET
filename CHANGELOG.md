@@ -5,6 +5,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-02
+
+### Added
+- Sign in or sign up with a fediverse account (Mastodon, GoToSocial, Akkoma, and other servers with the Mastodon API).
+- Sign in or sign up with Bluesky or any ATProto PDS, via ATProto OAuth.
+- Connect or disconnect those accounts from the Account page, and optionally show your handle on your dating profile.
+- Age gate at /welcome for accounts created without email, which can also add an optional email.
+- Passwordless accounts confirm deletion by typing DELETE.
+- SSRF guard for fediverse sign-in: only public hostnames, no IPs or private networks, no redirects, 10 second timeouts.
+- `PUBLIC_URL` setting, and `/oauth-client-metadata.json` for ATProto.
+
+### Changed
+- Releases are automatic: merging a version bump to main tags it, publishes the Docker image, and creates the GitHub release.
+- Default support link is now https://mkultra.monster/support/.
+
 ## [0.1.0] - 2026-11-02
 
 ### Added
@@ -21,5 +36,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Installable PWA manifest, light and dark themes.
 - Docker Compose setup (app + PostGIS), demo seed script, unit tests, Playwright end-to-end test, CI and release workflows.
 
-[Unreleased]: https://github.com/cmdr-nova/tesslet/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/cmdr-nova/tesslet/releases/tag/v0.1.0
+[Unreleased]: https://github.com/cmdr-nova/tesslet/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/cmdr-nova/tesslet/releases/tag/v0.2.0
+[0.1.0]: https://github.com/cmdr-nova/tesslet/commit/6a650ee

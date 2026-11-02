@@ -42,6 +42,7 @@ npm run dev                      # http://localhost:5173
 | `npm test` | Unit tests (`src/**/*.test.ts`, Node's built-in runner) |
 | `npm run build` then `npm start` | Production build, migrate, serve on port 3000 |
 | `npm run test:e2e` | Playwright run through the whole core loop against a running, freshly seeded server |
+| `npm run test:e2e:fedi` | Fediverse sign-in, against `tests/mock-mastodon.mjs` (app started with `FEDI_DEV_ALLOW_LOCAL=1`) |
 | `npm run db:migrate` | Apply new files in `migrations/` |
 | `npm run db:seed` | Add demo people |
 
@@ -52,10 +53,24 @@ npm run dev                      # http://localhost:5173
 | `DATABASE_URL` | `postgres://tesslet:tesslet@localhost:5432/tesslet` | Postgres with PostGIS |
 | `UPLOAD_DIR` | `./data/uploads` (`/data/uploads` in Docker) | Where photos are stored |
 | `APP_NAME` | `Tesslet` | Shown in the header and About page |
-| `ADMIN_EMAILS` | empty | Comma-separated; these accounts get `/admin` when they sign up |
-| `SUPPORT_URL` | `https://mkultra.monster/clearance/` | The support link on the About page |
+| `ADMIN_EMAILS` | empty | Comma-separated; these accounts get `/admin` when they sign up (fediverse/Bluesky users can add an email at the welcome step) |
+| `PUBLIC_URL` | empty | Your public `https://` URL. Required for Bluesky/ATProto login in production |
+| `SUPPORT_URL` | `https://mkultra.monster/support/` | The support link on the About page |
 | `POSTGRES_PASSWORD` | `tesslet` | Compose only. Change it for anything public |
 | `PORT` | `3000` | HTTP port |
+
+## Signing in with the fediverse or Bluesky
+
+People can skip email and passwords entirely:
+
+- **Fediverse** (Mastodon, GoToSocial, Akkoma, and anything else with the Mastodon client API): they type their server or handle, approve Tesslet on their server, and come back signed in. Tesslet registers itself with each server automatically the first time. It asks for `read:accounts` only, reads who you are, and immediately revokes the token.
+- **Bluesky / ATProto**: uses ATProto OAuth through the official `@atproto/oauth-client-node`. Again only the `atproto` identity scope, and the session is revoked right after.
+
+New accounts made this way confirm their age at `/welcome` before setting up a profile. Existing users can connect either kind of account from the Account page, and can choose to show the handle on their profile.
+
+**Bluesky login needs a public URL.** The PDS fetches Tesslet's client metadata from `PUBLIC_URL/oauth-client-metadata.json`, so set `PUBLIC_URL=https://your.domain` when deployed. Locally, leave it empty and open the app at **http://127.0.0.1:3000** (not `localhost`): ATProto's development mode only allows 127.0.0.1 redirects.
+
+Testing fediverse login without the internet: `node tests/mock-mastodon.mjs 4010`, start the app with `FEDI_DEV_ALLOW_LOCAL=1`, and sign in with `localhost:4010`. Never set `FEDI_DEV_ALLOW_LOCAL` in production; it lets the server talk to localhost.
 
 ## Deploying
 
@@ -83,12 +98,11 @@ Set a real `POSTGRES_PASSWORD`, and back up the `db` and `uploads` volumes.
 
 Tesslet uses [Semantic Versioning](https://semver.org/) and keeps a [CHANGELOG](CHANGELOG.md).
 
-To cut a release:
+Releases are automatic. To cut one, in a PR:
 
-1. Move the `Unreleased` notes in `CHANGELOG.md` under a new version heading.
-2. `npm version <patch|minor|major> --no-git-tag-version` and commit both files.
-3. `git tag vX.Y.Z && git push origin main --tags`
+1. Move the `Unreleased` notes in `CHANGELOG.md` under a new `## [X.Y.Z] - date` heading.
+2. Bump `"version"` in `package.json` to match (`npm version <patch|minor|major> --no-git-tag-version`).
 
-The Release workflow checks the tag matches `package.json`, publishes `ghcr.io/cmdr-nova/tesslet:X.Y.Z` (plus `X.Y` and `latest`), and creates a GitHub release from the changelog entry.
+When that merges to `main`, the Release workflow sees a version with no tag yet, tags it `vX.Y.Z`, publishes `ghcr.io/cmdr-nova/tesslet:X.Y.Z` and `:latest`, and creates the GitHub release from the changelog entry. Pushes that don't change the version do nothing. You can also run it by hand from the Actions tab.
 
 CI runs on every push to `main` and every pull request: typecheck, unit tests, build, migrations, seed, the full end-to-end test, and a Docker build.

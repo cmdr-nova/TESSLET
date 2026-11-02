@@ -22,7 +22,7 @@ export async function createSession(userId: string) {
 
 export async function validateSession(token: string): Promise<App.Locals['user']> {
 	const [row] = await sql`
-		select u.id, u.email, u.is_admin, u.status, s.expires_at, p.display_name
+		select u.id, u.email, u.is_admin, u.status, u.birthdate, s.expires_at, p.display_name
 		from sessions s
 		join users u on u.id = s.user_id
 		left join profiles p on p.user_id = u.id
@@ -35,7 +35,8 @@ export async function validateSession(token: string): Promise<App.Locals['user']
 	}
 	return {
 		id: row.id,
-		email: row.email,
+		email: row.email ?? null,
+		needsOnboarding: row.birthdate == null,
 		isAdmin: row.is_admin,
 		displayName: row.display_name ?? null,
 		hasProfile: row.display_name != null
@@ -48,4 +49,10 @@ export async function deleteSession(token: string) {
 
 export function setSessionCookie(cookies: Cookies, token: string, expires: Date, secure: boolean) {
 	cookies.set(SESSION_COOKIE, token, { path: '/', httpOnly: true, sameSite: 'lax', secure, expires });
+}
+
+export function isAdult(birthdate: Date) {
+	const cutoff = new Date();
+	cutoff.setFullYear(cutoff.getFullYear() - 18);
+	return birthdate <= cutoff;
 }

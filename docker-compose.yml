@@ -23,7 +23,9 @@ services:
       DATABASE_URL: postgres://tesslet:${POSTGRES_PASSWORD:-tesslet}@db:5432/tesslet
       APP_NAME: ${APP_NAME:-Tesslet}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
-      SUPPORT_URL: ${SUPPORT_URL:-https://mkultra.monster/clearance/}
+      # Public https URL, e.g. https://tesslet.example. Required for Bluesky login when deployed.
+      PUBLIC_URL: ${PUBLIC_URL:-}
+      SUPPORT_URL: ${SUPPORT_URL:-https://mkultra.monster/support/}
     ports:
       - "3000:3000"
     volumes:
