@@ -2,8 +2,9 @@ import type { Handle } from '@sveltejs/kit/hooks';
 import { SESSION_COOKIE, validateSession } from '#lib/server/auth.ts';
 import { sql } from '#lib/server/db.ts';
 
-const PUBLIC = new Set(['/', '/login', '/signup', '/about']);
-const NO_PROFILE_OK = new Set(['/profile', '/logout', '/about', '/account']);
+const PUBLIC = new Set(['/', '/login', '/signup', '/about', '/oauth-client-metadata.json']);
+const NO_PROFILE_OK = new Set(['/profile', '/logout', '/about', '/account', '/welcome']);
+const ONBOARDING_OK = new Set(['/welcome', '/logout', '/about']);
 
 const redirectTo = (location: string) => new Response(null, { status: 303, headers: { location } });
 
@@ -13,9 +14,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = user;
 
 	const path = event.url.pathname;
-	const isPublic = PUBLIC.has(path);
+	// /auth/* handles fediverse and ATProto sign-in, for logged-out and logged-in (linking) users alike.
+	const isPublic = PUBLIC.has(path) || path.startsWith('/auth/');
 
 	if (!user && !isPublic) return redirectTo('/login');
+	if (user?.needsOnboarding && !isPublic && !ONBOARDING_OK.has(path)) return redirectTo('/welcome');
 	if (user && !user.hasProfile && !isPublic && !NO_PROFILE_OK.has(path)) return redirectTo('/profile');
 	if (path.startsWith('/admin') && !user?.isAdmin) return new Response('Not found', { status: 404 });
 

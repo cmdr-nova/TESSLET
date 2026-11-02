@@ -16,6 +16,8 @@ const cardColumns = (me: string) => sql`
 	extract(year from age(u.birthdate))::int as age,
 	case when p.location is not null and me.location is not null
 		then ST_Distance(p.location, me.location) / 1000 end as km,
+	(select json_build_object('name', i.handle, 'url', i.profile_url) from identities i
+		where i.user_id = p.user_id and p.show_handle order by i.created_at limit 1) as handle,
 	exists (select 1 from swipes l where l.swiper_id = p.user_id and l.target_id = ${me} and l.liked) as liked_you,
 	coalesce((select array_agg(ph.filename order by ph.position) from photos ph
 		where ph.user_id = p.user_id and not ph.hidden), '{}') as photos`;
@@ -29,7 +31,8 @@ function toCard(row: Record<string, any>): PersonCard {
 		bio: row.bio,
 		distance: distanceLabel(row.km),
 		photos: (row.photos as string[]).map(photoUrl),
-		likedYou: row.liked_you
+		likedYou: row.liked_you,
+		handle: row.handle ?? null
 	};
 }
 

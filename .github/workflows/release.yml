@@ -1,61 +1,78 @@
-# Push a tag like v0.2.0 (matching package.json) to publish a GitHub release
-# and a Docker image at ghcr.io/<owner>/tesslet:<version> and :latest.
+# Releases happen automatically: when a push to main carries a package.json version
+# that has no tag yet, this tags it vX.Y.Z, publishes ghcr.io/<owner>/tesslet:X.Y.Z
+# (plus latest), and creates a GitHub release from that version's CHANGELOG.md entry.
+# To release: bump "version" in package.json and add a matching CHANGELOG.md section.
 name: Release
 
 on:
   push:
-    tags: ['v*.*.*']
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
   packages: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Tag must match package.json version
+      - name: Is this version already released?
+        id: version
         run: |
-          PKG="v$(node -p "require('./package.json').version")"
-          if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match package.json ($PKG)"; exit 1
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # Docker image names must be lowercase, and the repo name may not be.
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "v$VERSION already exists, nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Pull this version's notes from CHANGELOG.md
+        if: steps.version.outputs.release == 'true'
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          awk -v v="$VERSION" '
+          awk -v v="${{ steps.version.outputs.version }}" '
             /^## \[/ { if (found) exit; if (index($0, "[" v "]")) { found=1; next } }
             found { print }
           ' CHANGELOG.md > notes.md
-          [ -s notes.md ] || { echo "No CHANGELOG.md entry for $VERSION"; exit 1; }
+          [ -s notes.md ] || { echo "No CHANGELOG.md entry for ${{ steps.version.outputs.version }}"; exit 1; }
 
       - uses: docker/setup-buildx-action@v3
+        if: steps.version.outputs.release == 'true'
       - uses: docker/login-action@v3
+        if: steps.version.outputs.release == 'true'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest
       - uses: docker/build-push-action@v6
+        if: steps.version.outputs.release == 'true'
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ steps.version.outputs.image }}:${{ steps.version.outputs.version }}
+            ${{ steps.version.outputs.image }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Create GitHub release
+      - name: Tag and create the GitHub release
+        if: steps.version.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --title "Tesslet $GITHUB_REF_NAME" --notes-file notes.md
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            --target "$GITHUB_SHA" \
+            --title "Tesslet v${{ steps.version.outputs.version }}" \
+            --notes-file notes.md

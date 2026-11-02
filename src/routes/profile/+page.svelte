@@ -98,5 +98,11 @@
 		{#if locStatus}<p class="muted">{locStatus}</p>{/if}
 	</fieldset>
 
+	{#if data.handles.length}
+		<label class="checks">
+			<span><input type="checkbox" name="show_handle" checked={p?.show_handle} /> Show {data.handles[0]} on my profile</span>
+		</label>
+	{/if}
+
 	<button>Save profile</button>
 </form>
