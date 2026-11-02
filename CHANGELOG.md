@@ -5,6 +5,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+- Sign in or sign up with a fediverse account (Mastodon, GoToSocial, Akkoma, and other servers with the Mastodon API).
+- Sign in or sign up with Bluesky or any ATProto PDS, via ATProto OAuth.
+- Connect or disconnect those accounts from the Account page, and optionally show your handle on your dating profile.
+- Age gate at /welcome for accounts created without email, which can also add an optional email.
+- Passwordless accounts confirm deletion by typing DELETE.
+- SSRF guard for fediverse sign-in: only public hostnames, no IPs or private networks, no redirects, 10 second timeouts.
+- `PUBLIC_URL` setting, and `/oauth-client-metadata.json` for ATProto.
+
 ## [0.1.0] - 2026-11-02
 
 ### Added

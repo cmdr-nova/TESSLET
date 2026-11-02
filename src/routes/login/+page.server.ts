@@ -18,7 +18,7 @@ export const actions: Actions = {
 			return fail(429, { email, error: 'Too many attempts. Wait 15 minutes and try again.' });
 		}
 		const [user] = await sql`select id, password_hash, status from users where email = ${email}`;
-		if (!user || !(await verifyPassword(user.password_hash, password))) {
+		if (!user?.password_hash || !(await verifyPassword(user.password_hash, password))) {
 			return fail(400, { email, error: "Email or password didn't match." });
 		}
 		if (user.status !== 'active') return fail(403, { email, error: 'This account has been suspended.' });

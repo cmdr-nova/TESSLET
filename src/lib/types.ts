@@ -7,4 +7,6 @@ export type PersonCard = {
 	distance: string;
 	photos: string[];
 	likedYou: boolean;
+	/** Linked fediverse/Bluesky handle, only when the person opted to show it. */
+	handle: { name: string; url: string | null } | null;
 };

@@ -42,12 +42,16 @@ jobs:
       - run: npm run db:migrate
       - run: npm run db:seed
       - run: npx playwright install --with-deps chromium
-      - name: Start server
+      - name: Start server (and a fake Mastodon server for sign-in tests)
+        env:
+          FEDI_DEV_ALLOW_LOCAL: '1'
         run: |
+          node tests/mock-mastodon.mjs 4010 > mock.log 2>&1 &
           npm start > server.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://localhost:3000/ > /dev/null && exit 0; sleep 1; done
           cat server.log; exit 1
       - run: npm run test:e2e
+      - run: npm run test:e2e:fedi
       - name: Server log
         if: failure()
         run: cat server.log

@@ -27,6 +27,11 @@
 			{#if person.pronouns}<small class="muted">({person.pronouns})</small>{/if}
 		</h2>
 		{#if person.distance}<p class="muted" style="margin:0">{person.distance}</p>{/if}
+		{#if person.handle}
+			<p style="margin:0">
+				{#if person.handle.url}<a href={person.handle.url} rel="noopener nofollow" target="_blank">{person.handle.name}</a>{:else}{person.handle.name}{/if}
+			</p>
+		{/if}
 		{#if person.likedYou}<p class="ok" style="margin:0.25rem 0 0">Likes you</p>{/if}
 		{#if person.bio}<p style="white-space: pre-line">{person.bio}</p>{/if}
 	</div>

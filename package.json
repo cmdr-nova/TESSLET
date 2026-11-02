@@ -14,7 +14,8 @@
 		"db:migrate": "node scripts/migrate.js",
 		"db:seed": "node scripts/seed.js",
 		"test": "node --experimental-strip-types --test \"src/**/*.test.ts\"",
-		"test:e2e": "node tests/e2e.mjs"
+		"test:e2e": "node tests/e2e.mjs",
+		"test:e2e:fedi": "node tests/e2e-fedi.mjs"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-node": "^6.0.1",
@@ -32,6 +33,7 @@
 		"#lib/*": "./src/lib/*"
 	},
 	"dependencies": {
+		"@atproto/oauth-client-node": "^0.5.13",
 		"@node-rs/argon2": "^2.2.2",
 		"postgres": "^4.0.0",
 		"sharp": "^0.35.5"

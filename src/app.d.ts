@@ -4,7 +4,9 @@ declare global {
 		interface Locals {
 			user: {
 				id: string;
-				email: string;
+				email: string | null;
+				/** Signed up via fediverse/ATProto and hasn't confirmed their age yet. */
+				needsOnboarding: boolean;
 				isAdmin: boolean;
 				displayName: string | null;
 				hasProfile: boolean;
